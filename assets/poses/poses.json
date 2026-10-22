@@ -1,0 +1,240 @@
+{
+ "mouth_ratio": {
+  "mouth_closed": 1.0,
+  "mouth_half": 0.85,
+  "mouth_open_A": 0.75,
+  "mouth_smile_talk": 1.0,
+  "mouth_smile_closed": 0.95
+ },
+ "poses": {
+  "bust": {
+   "kind": "full",
+   "width_pct": 86,
+   "mouth": {
+    "center": [
+     613,
+     567
+    ],
+    "width": 58,
+    "rot": 0,
+    "scale": 1.0,
+    "patch_box": [
+     558,
+     543,
+     675,
+     614
+    ]
+   }
+  },
+  "arms34": {
+   "kind": "full",
+   "width_pct": 80,
+   "mouth": {
+    "center": [
+     615,
+     380
+    ],
+    "width": 30,
+    "rot": 0,
+    "scale": 1.0,
+    "patch_box": [
+     586,
+     368,
+     647,
+     405
+    ]
+   }
+  },
+  "think": {
+   "kind": "full",
+   "width_pct": 80
+  },
+  "point": {
+   "kind": "full",
+   "width_pct": 80,
+   "mouth": {
+    "center": [
+     615,
+     368
+    ],
+    "width": 34,
+    "rot": 0,
+    "scale": 1.0,
+    "patch_box": [
+     583,
+     353,
+     652,
+     396
+    ]
+   }
+  },
+  "down": {
+   "kind": "full",
+   "width_pct": 80,
+   "mouth": {
+    "center": [
+     615,
+     378
+    ],
+    "width": 30,
+    "rot": 0,
+    "scale": 1.0,
+    "patch_box": [
+     586,
+     366,
+     647,
+     403
+    ]
+   }
+  },
+  "back": {
+   "kind": "waist",
+   "width_pct": 86
+  },
+  "desk": {
+   "kind": "waist",
+   "width_pct": 100,
+   "mouth": {
+    "center": [
+     743,
+     494
+    ],
+    "width": 34,
+    "rot": 0,
+    "scale": 1.3,
+    "patch_box": [
+     707,
+     475,
+     784,
+     518
+    ]
+   }
+  },
+  "hands_face": {
+   "kind": "waist",
+   "width_pct": 86
+  },
+  "hands_on_hips": {
+   "kind": "waist",
+   "width_pct": 86,
+   "mouth": {
+    "center": [
+     626,
+     425
+    ],
+    "width": 40,
+    "rot": 0,
+    "scale": 1.3,
+    "patch_box": [
+     584,
+     403,
+     673,
+     452
+    ]
+   }
+  },
+  "phone": {
+   "kind": "waist",
+   "width_pct": 86,
+   "mouth": {
+    "center": [
+     625,
+     433
+    ],
+    "width": 42,
+    "rot": 0,
+    "scale": 1.3,
+    "patch_box": [
+     580,
+     409,
+     675,
+     462
+    ]
+   }
+  },
+  "point_up": {
+   "kind": "waist",
+   "width_pct": 86,
+   "mouth": {
+    "center": [
+     629,
+     433
+    ],
+    "width": 41,
+    "rot": 0,
+    "scale": 1.3,
+    "patch_box": [
+     586,
+     410,
+     677,
+     461
+    ]
+   }
+  },
+  "shy_lean": {
+   "kind": "waist",
+   "width_pct": 86,
+   "mouth": {
+    "center": [
+     604,
+     440
+    ],
+    "width": 38,
+    "rot": 30,
+    "scale": 1.3,
+    "patch_box": [
+     568,
+     413,
+     645,
+     472
+    ]
+   }
+  },
+  "side_left": {
+   "kind": "waist",
+   "width_pct": 86
+  },
+  "side_right": {
+   "kind": "waist",
+   "width_pct": 86
+  },
+  "thumbs_up": {
+   "kind": "waist",
+   "width_pct": 86,
+   "mouth": {
+    "center": [
+     613,
+     433
+    ],
+    "width": 42,
+    "rot": 0,
+    "scale": 1.3,
+    "patch_box": [
+     568,
+     409,
+     663,
+     462
+    ]
+   }
+  },
+  "wave": {
+   "kind": "waist",
+   "width_pct": 86,
+   "mouth": {
+    "center": [
+     640,
+     442
+    ],
+    "width": 42,
+    "rot": 0,
+    "scale": 1.3,
+    "patch_box": [
+     595,
+     418,
+     690,
+     471
+    ]
+   }
+  }
+ }
+}
