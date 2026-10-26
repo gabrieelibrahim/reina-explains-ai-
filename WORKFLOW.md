@@ -65,7 +65,8 @@ Pesan singkat (bahasa Indonesia): topik, durasi estimasi, placeholder yang perlu
 ## Fakta Sakelar AI yang boleh dipakai
 - Sakelar AI = satu pintu (gateway) untuk banyak model AI.
 - Token dijual dalam **paket per model**, isinya sekian juta token ("M" = juta token).
-- URL: **app.sakelar.web.id**. Logo ada di `assets/brand/`.
+- URL: **app.sakelar.web.id**.
+- **Logo (baru, wajib):** toggle — pil hitam dengan bulatan mint di kanan. Logo utama = `assets/brand/sakelar_logo_main.png` (latar transparan; versi kotak: `sakelar_logo_app_light.png` = utama, `_app_mint.png`, `_app_dark.png`). Selalu pakai lewat `wordmark()` / `logo()`. **Jangan pakai logo lama** (garis/tuas) — file lamanya sudah dihapus.
 - **Belum ada data resmi**: nama model, isi paket, harga → selalu placeholder ("Model A / 5M token — contoh", "Rp ???").
 
 ---
@@ -135,7 +136,7 @@ assets/poses/          pose Reina (PNG transparan) + poses.json (lebar, titik mu
 assets/mouth_patches/  potongan area mulut yang sudah di-inpaint (untuk lip sync)
 assets/sprites/        sprite mulut (+ mata/efek, tidak dipakai di wajah)
 assets/bg/office.png   latar kantor
-assets/brand/          logo Sakelar (gelap/putih)
+assets/brand/          logo Sakelar toggle (main = utama, transparan; app_light/app_mint/app_dark = versi kotak)
 assets/fonts/          Poppins (SIL OFL)
 ```
 

@@ -114,7 +114,7 @@ def storyboard_md(E, final=False):
     k = 1
     for p, ids in used.items(): P(f"| AS{k:02d} | assets/poses/{p}.png | {', '.join(ids)} | tersedia |"); k += 1
     for row in [('assets/sprites/mouth_*.png', 'shot berdialog', 'tersedia'), ('assets/bg/office.png', 'semua', 'tersedia'),
-                ('assets/brand/sakelar_logo_dark.png', 'shot dengan logo', 'tersedia'), ('assets/fonts/Poppins-*.ttf', 'semua', 'tersedia'),
+                ('assets/brand/sakelar_logo_main.png (logo toggle baru)', 'shot dengan logo', 'tersedia'), ('assets/fonts/Poppins-*.ttf', 'semua', 'tersedia'),
                 ('SFX sintetis (engine/sfx.py)', 'lihat cue sheet', 'dibuat otomatis'),
                 (f'VO {E.tag} (L01…)', 'semua', 'tersedia' if final else 'menunggu rekaman')]:
         P(f'| AS{k:02d} | ' + ' | '.join(row) + ' |'); k += 1

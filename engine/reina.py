@@ -133,12 +133,12 @@ def badge(im, s, cx, cy, col=F['ink'], tcol=F['white'], size=26, a=255):
     txt(im, s, (cx, cy), size, tcol, 'Medium', a=a)
 _LOGO = {}
 def logo(dark=True):
-    k = 'dark' if dark else 'white'
-    if k not in _LOGO: _LOGO[k] = Image.open(os.path.join(A, 'brand', f'sakelar_logo_{k}.png')).convert('RGBA')
-    return _LOGO[k]
+    """Logo utama Sakelar (toggle: pil hitam + bulatan mint, latar transparan). Parameter dark diabaikan (kompatibilitas)."""
+    if 'main' not in _LOGO: _LOGO['main'] = Image.open(os.path.join(A, 'brand', 'sakelar_logo_main.png')).convert('RGBA')
+    return _LOGO['main']
 def wordmark(l, cx, cy, wpx=300, col=F['ink'], tsize=None):
-    """Logo Sakelar + tulisan 'Sakelar AI' di bawahnya."""
-    lg = logo(True); lw = int(wpx * SS); lgr = lg.resize((lw, int(lg.height * lw / lg.width)), Image.LANCZOS)
+    """Logo Sakelar (toggle) + tulisan 'Sakelar AI' di bawahnya. wpx = lebar blok (logo ±55% dari wpx)."""
+    lg = logo(); lw = int(wpx * 0.55 * SS); lgr = lg.resize((lw, int(lg.height * lw / lg.width)), Image.LANCZOS)
     l.alpha_composite(lgr, (int(X(cx) - lw / 2), int(Y(cy) - lgr.height / 2)))
     txt(l, 'Sakelar AI', (cx, cy + (lgr.height / SS) / H * 100 / 2 + 2.2), tsize or wpx * 0.2, col, 'Bold')
 def comp(dst, lay, alpha=1.0, scale=1.0, anchor=(50, 25), dy=0.0, dx=0.0):
@@ -161,13 +161,13 @@ def appear(t, t0, d=0.35):
 # ---------------- background (tema clean) ----------------
 _BGI = {}
 def background(t, header):
-    if 'o' not in _BGI:
+    if header not in _BGI:
         b = Image.open(os.path.join(A, 'bg', 'office.png')).convert('RGB').resize((W * SS, H * SS), Image.LANCZOS)
         b = Image.blend(b, Image.new('RGB', b.size, (20, 22, 40)), 0.18).convert('RGBA')
         lay = canvas(); rr(lay, (3, 6.4, 97, 47.6), 44, F['bg'], a=232); b.alpha_composite(lay)   # panel info krem
         badge(b, header, 50, 3.6, F['ink'], F['white'], 24)
-        _BGI['o'] = b
-    return _BGI['o'].copy()
+        _BGI[header] = b
+    return _BGI[header].copy()
 
 # ---------------- Reina ----------------
 POSES = json.load(open(os.path.join(A, 'poses', 'poses.json')))
