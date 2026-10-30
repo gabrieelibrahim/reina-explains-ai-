@@ -160,14 +160,25 @@ def appear(t, t0, d=0.35):
 
 # ---------------- background (tema clean) ----------------
 _BGI = {}
+BG_COL = '#F7F5F0'   # tema "putih polos"
 def background(t, header):
+    """Tema putih polos: latar krem-putih rata, tanpa foto, tanpa garis, hanya badge judul seri."""
     if header not in _BGI:
-        b = Image.open(os.path.join(A, 'bg', 'office.png')).convert('RGB').resize((W * SS, H * SS), Image.LANCZOS)
-        b = Image.blend(b, Image.new('RGB', b.size, (20, 22, 40)), 0.18).convert('RGBA')
-        lay = canvas(); rr(lay, (3, 6.4, 97, 47.6), 44, F['bg'], a=232); b.alpha_composite(lay)   # panel info krem
+        b = Image.new('RGBA', (W * SS, H * SS), rgba(BG_COL))
         badge(b, header, 50, 3.6, F['ink'], F['white'], 24)
         _BGI[header] = b
     return _BGI[header].copy()
+
+# ---------------- posisi Reina (layout per shot) ----------------
+# nama: (skala, pusat x % lebar, geser ke bawah % tinggi). Gambar Reina TIDAK pernah dicerminkan (garis pipi kiri tetap kiri).
+LAYOUTS = {'tengah': (1.0, 50, 0), 'kiri': (0.95, 31, 0), 'kanan': (0.95, 69, 0), 'closeup': (1.25, 50, 12)}
+AUTO_CYCLE = ['kiri', 'kanan', 'closeup', 'kanan', 'kiri', 'tengah']
+def layout_of(m, shots, i):
+    """Layout shot ke-i: POS[sid] kalau ada, selain itu otomatis bergiliran (desk/tanpa dialog = tengah)."""
+    s = shots[i]; pos = getattr(m, 'POS', {})
+    if s['id'] in pos: return pos[s['id']]
+    if not s['lines'] or m.POSE[s['id']] == 'desk': return 'tengah'
+    return AUTO_CYCLE[i % len(AUTO_CYCLE)]
 
 # ---------------- Reina ----------------
 POSES = json.load(open(os.path.join(A, 'poses', 'poses.json')))
@@ -262,13 +273,13 @@ class Episode:
         if smile: return 'mouth_smile_closed' if k == 0 else 'mouth_smile_talk'
         return [None, 'mouth_half', 'mouth_open_A'][k]
     # --- subtitle ---
-    def sub_text(self, t):
+    def sub_text(self, t, width=32, maxl=2):
         l = self.line_at(t)
         if not l: return None
-        s = l['text']; lines = wrap(s)
-        if len(lines) <= 2: return '\n'.join(lines)
-        words = s.split(); n = math.ceil(len(lines) / 2); per = math.ceil(len(words) / n)
-        chunks = ['\n'.join(wrap(' '.join(words[i:i + per]))) for i in range(0, len(words), per)]
+        s = l['text']; lines = wrap(s, width)
+        if len(lines) <= maxl: return '\n'.join(lines)
+        words = s.split(); n = math.ceil(len(lines) / maxl); per = math.ceil(len(words) / n)
+        chunks = ['\n'.join(wrap(' '.join(words[i:i + per]), width)) for i in range(0, len(words), per)]
         k = min(len(chunks) - 1, int((t - l['start']) / (l['end'] - l['start']) * len(chunks)))
         return chunks[k]
     def shot_at(self, t):
@@ -286,14 +297,22 @@ class Episode:
         base = bg.resize((W, H), Image.LANCZOS)
         name = m.POSE[sid]; smile = sid in getattr(m, 'SMILE', set())
         img = pose_image(name, self.mouth(t, smile) if has_lipsync(name) else None)
-        meta = POSES['poses'][name]; w = int(W * meta['width_pct'] / 100)
+        lay = layout_of(m, self.shots, i); sc, cx, dyp = LAYOUTS[lay]
+        if prev is not None:   # geser halus dari posisi shot sebelumnya (0.35 s)
+            psc, pcx, pdy = LAYOUTS[layout_of(m, self.shots, i - 1)]; k = ease_inout_cubic(clamp(u / 0.35))
+            sc, cx, dyp = lerp(psc, sc, k), lerp(pcx, cx, k), lerp(pdy, dyp, k)
+        meta = POSES['poses'][name]; w = int(W * meta['width_pct'] / 100 * sc)
         sy = 1 + 0.006 * (0.5 + 0.5 * math.sin(2 * math.pi * t / 3.0))     # napas
         rimg = img.resize((w, int(w * img.height / img.width * sy)), Image.LANCZOS)
         dy = (1 - ease_out_back(clamp(u / 0.35))) * 5 if enter else 0     # masuk saat pose/scene berganti
-        base.alpha_composite(rimg, (int(W / 2 - w / 2), int(H - rimg.height + dy * H / 100)))
-        st = self.sub_text(t)
+        base.alpha_composite(rimg, (int(W * cx / 100 - w / 2), int(H - rimg.height + (dy + dyp) * H / 100)))
+        side = lay in ('kiri', 'kanan')
+        st = self.sub_text(t, 17 if side else 32, 4 if side else 2)
         if st:
-            ov = canvas(); subtitle(ov, st); base.alpha_composite(ov.resize((W, H), Image.LANCZOS))
+            ov = canvas()
+            if side: side_subtitle(ov, st, 74 if lay == 'kiri' else 26, lay)
+            else: subtitle(ov, st)
+            base.alpha_composite(ov.resize((W, H), Image.LANCZOS))
         if t > self.total - 0.5:
             k = clamp((t - (self.total - 0.5)) / 0.5)
             base = Image.blend(base, Image.new('RGBA', (W, H), rgba(F['bg'])), k)
@@ -313,6 +332,18 @@ def subtitle(im, s):
     rr(im, (50 - wp / 2, cy - hp / 2 + 0.3, 50 + wp / 2, cy + hp / 2 + 0.3), 30, F['ink'], a=40)
     rr(im, (50 - wp / 2, cy - hp / 2, 50 + wp / 2, cy + hp / 2), 30, F['white'], a=245)
     txt(im, s, (50, cy), size, F['ink'], 'Medium', spacing=12)
+
+def side_subtitle(im, s, cx, lay, size=40):
+    """Subtitle balon ucapan di sisi kosong (Reina di kiri/kanan); ekor menunjuk ke arah Reina."""
+    lines = s.split('\n'); cy = 60.0
+    wmax = max(tw_px(l, size, 'Medium') for l in lines)
+    wp = (wmax + 70) / W * 100; hp = (len(lines) * size * 1.42 + 40) / H * 100
+    x0, x1 = cx - wp / 2, cx + wp / 2
+    rr(im, (x0, cy - hp / 2 + 0.3, x1, cy + hp / 2 + 0.3), 34, F['ink'], a=40)
+    rr(im, (x0, cy - hp / 2, x1, cy + hp / 2), 34, F['white'], a=250)
+    sg = 1 if lay == 'kiri' else -1; tx = x0 if lay == 'kiri' else x1
+    poly(im, [(tx + 0.2 * sg, cy - 1.2), (tx + 0.2 * sg, cy + 1.2), (tx - 3.2 * sg, cy + 2.6)], F['white'], a=250)
+    txt(im, s, (cx, cy), size, F['ink'], 'Medium', spacing=12)
 
 def load_episode(path, workdir='.'):
     global E

@@ -1,5 +1,5 @@
 """Generator dokumen: storyboard .md (10 bagian sesuai panduan) dan prompt VO .md, dari file episode."""
-from reina import tc, FPS, POSES, SH, LN
+from reina import tc, FPS, POSES, SH, LN, layout_of, LAYOUTS
 import sfx as SFX
 
 def fr(x): return round(x * FPS)
@@ -47,16 +47,16 @@ def storyboard_md(E, final=False):
     for l in LINES: P(f"| {l['id']} | {l['shot']} | {tc(l['start'])} | {tc(l['end'])} | {l['dur']:.2f} s | {l['syl']} | {l['text']} |")
     P('')
     P('## 5. Timeline master\n')
-    P('| Shot | Mulai | Selesai | Durasi | Frame | Judul | Dialog | Tujuan | Pose Reina | Transisi |\n|---|---|---|---|---|---|---|---|---|---|')
+    P('| Shot | Mulai | Selesai | Durasi | Frame | Judul | Dialog | Tujuan | Pose Reina | Posisi | Transisi |\n|---|---|---|---|---|---|---|---|---|---|---|')
     for s in SHOTS:
         sp = spec(s['id'])
-        P(f"| {s['id']} | {tc(s['start'])} | {tc(s['end'])} | {s['end'] - s['start']:.3f} s | {fr(s['start'])}–{fr(s['end']) - 1} | {s['title']} | {', '.join(s['lines']) or '—'} | {sp['goal']} | {m.POSE[s['id']]} | {'fade ke latar 0.5 s' if s['id'] == last else 'hard cut'} |")
+        P(f"| {s['id']} | {tc(s['start'])} | {tc(s['end'])} | {s['end'] - s['start']:.3f} s | {fr(s['start'])}–{fr(s['end']) - 1} | {s['title']} | {', '.join(s['lines']) or '—'} | {sp['goal']} | {m.POSE[s['id']]} | {layout_of(m, SHOTS, SHOTS.index(s))} | {'fade ke latar 0.5 s' if s['id'] == last else 'hard cut'} |")
     P('')
     P('## 6. Storyboard per shot\n')
     P('**Konvensi global (berlaku di semua shot, kecuali disebut lain):**')
     for x in ['Koordinat = persen kanvas, origin (0,0) kiri atas. Ukuran font & radius dalam px pada 1080×1920.',
-              'Latar: assets/bg/office.png (kantor isometrik blur) cover 1080×1920, digelapkan 18%. Statis. Tanpa lingkaran/dekor.',
-              'Panel info (z=2): kotak krem #F6F1E7 opacity 91% x=3–97%, y=6.4–47.6%, radius 44px.',
+              'Latar: tema putih polos, warna rata #F7F5F0 1080×1920. Statis. Tanpa foto, tanpa garis, tanpa lingkaran/dekor.',
+              'Posisi Reina berganti per shot (kiri / kanan / closeup / tengah), geser halus 0.35 s antar shot; gambar Reina tidak pernah dicerminkan.',
               f'Header (z=5): badge navy "REINA EXPLAINS AI · EP {E.ep:02d}" Poppins Medium 24px putih di (50%,3.6%).',
               'Panel visual (z=3): area y 7–47%. Kartu putih radius 28–44px, shadow navy 13% offset +0.45% y.',
               'Pop-in standar: opacity 0→1 dalam 0.16 s, scale 0.90→1.00 easeOutBack 0.35 s.',
@@ -69,11 +69,13 @@ def storyboard_md(E, final=False):
         P(f"### SHOT {sid} — {s['title']}\n")
         P(f"- **Timecode:** masuk `{tc(s['start'])}`, keluar `{tc(s['end'])}`; durasi `{d:.3f} s`; frame {fr(s['start'])}–{fr(s['end']) - 1} ({fr(s['end']) - fr(s['start'])} frame).")
         P(f"- **Tujuan komunikasi:** {sp['goal']}")
-        P('- **Setting:** latar kantor blur + panel info krem; BG = latar, MG = panel visual, FG = Reina + subtitle.')
+        P('- **Setting:** tema putih polos (#F7F5F0, tanpa foto/garis); BG = latar, MG = visual di area atas, FG = Reina + subtitle.')
         P('- **Komposisi:** MS vertikal, frontal eye-level. Atas = panel visual (y 7–47%), bawah = Reina. Safe area teks x 4–96%, y 2–58%.')
         P('- **Posisi objek:**')
         for o in sp['obj']: P(f'  - {o}')
-        P(f"  - Reina pose `{pn}` anchor bawah-tengah (50%,100%), lebar {pm['width_pct']}% kanvas, z=4.")
+        lay = layout_of(m, E.shots, E.shots.index(s)); lsc, lcx, ldy = LAYOUTS[lay]
+        P(f"  - Reina pose `{pn}`, posisi **{lay}**: pusat x={lcx}%, skala {lsc}×, lebar {pm['width_pct'] * lsc:.0f}% kanvas, z=4"
+          + (' — subtitle jadi balon ucapan di sisi kosong (y≈60%).' if lay in ('kiri', 'kanan') else ' — subtitle tengah (y≈52%).'))
         lip = 'sprite tertutup/setengah/terbuka sesuai VO' + (' (versi senyum)' if sid in smile else '') if 'mouth' in pm else 'tanpa lip sync (pose ini tidak punya titik mulut)'
         P(f"- **Karakter:** Reina, ekspresi {getattr(m, 'EXPR', {}).get(sid, '—')}. Wajah asli. Mulut: {lip}.")
         P('- **Gerak animasi** (t relatif awal shot):')
@@ -113,7 +115,7 @@ def storyboard_md(E, final=False):
     for s in SHOTS: used.setdefault(m.POSE[s['id']], []).append(s['id'])
     k = 1
     for p, ids in used.items(): P(f"| AS{k:02d} | assets/poses/{p}.png | {', '.join(ids)} | tersedia |"); k += 1
-    for row in [('assets/sprites/mouth_*.png', 'shot berdialog', 'tersedia'), ('assets/bg/office.png', 'semua', 'tersedia'),
+    for row in [('assets/sprites/mouth_*.png', 'shot berdialog', 'tersedia'), ('latar putih polos #F7F5F0 (dibuat engine)', 'semua', 'otomatis'),
                 ('assets/brand/sakelar_logo_main.png (logo toggle baru)', 'shot dengan logo', 'tersedia'), ('assets/fonts/Poppins-*.ttf', 'semua', 'tersedia'),
                 ('SFX sintetis (engine/sfx.py)', 'lihat cue sheet', 'dibuat otomatis'),
                 (f'VO {E.tag} (L01…)', 'semua', 'tersedia' if final else 'menunggu rekaman')]:

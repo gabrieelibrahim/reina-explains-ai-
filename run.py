@@ -30,6 +30,7 @@ def validate(E):
         sid = s['id']
         if sid not in m.POSE: errs.append(f'{sid}: tidak ada di POSE')
         elif m.POSE[sid] not in RE.POSES['poses']: errs.append(f"{sid}: pose '{m.POSE[sid]}' tidak ada (pilihan: {', '.join(RE.POSES['poses'])})")
+        if sid in getattr(m, 'POS', {}) and m.POS[sid] not in RE.LAYOUTS: errs.append(f"{sid}: POS '{m.POS[sid]}' tidak dikenal (pilihan: {', '.join(RE.LAYOUTS)})")
         sp = m.spec(sid)
         for k in ('goal', 'obj', 'anim', 'text', 'sfx', 'qa'):
             if k not in sp: errs.append(f'{sid}: spec tanpa {k}')

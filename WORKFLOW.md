@@ -1,6 +1,6 @@
-# REINA EXPLAINS AI — Workflow Produksi (tema "clean")
+# REINA EXPLAINS AI — Workflow Produksi (tema "putih polos")
 
-Kit ini berisi semua yang dibutuhkan untuk bikin satu episode dari nol: aset Reina, latar kantor, font, logo,
+Kit ini berisi semua yang dibutuhkan untuk bikin satu episode dari nol: aset Reina, font, logo,
 engine render (`frame(t)` = fungsi murni dari waktu), efek suara sintetis, dan generator storyboard/prompt VO.
 Butuh: Python 3 + `numpy` + `pillow`, dan `ffmpeg`. (Tidak butuh internet untuk render.)
 
@@ -32,9 +32,9 @@ dalam satu kali kirim. User boleh langsung rekam; revisi visual tetap bisa kapan
 3. Tulis naskah mengikuti **Panduan naskah** di bawah.
 
 ### Langkah 2 — Bikin file episode
-1. `cp episodes/ep06.py episodes/epXX.py`, lalu ganti: `EP`, `TITLE`, `SCENES`, `META`, `PRON`, `VO_DIR`, `LINES`, `SHOTS`, `POSE`, `SMILE`, `EXPR`, `panel()`, `spec()`.
+1. `cp episodes/<episode terbaru>.py episodes/epXX.py`, lalu ganti: `EP`, `TITLE`, `SCENES`, `META`, `PRON`, `VO_DIR`, `LINES`, `SHOTS`, `POSE`, `POS`, `SMILE`, `EXPR`, `panel()`, `spec()`.
 2. `python run.py check episodes/epXX.py` → **lihat SETIAP gambar `out/epXX/epXX_sceneN_*.png`** (pakai Read). Perbaiki teks terpotong, tumpang tindih, elemen keluar panel, lalu ulangi `check`.
-3. Kriteria lolos: teks tidak keluar panel krem (x 4–96%, y 7–47%), tidak ada yang menutupi wajah Reina atau subtitle, label "contoh"/"ilustrasi" ada di angka yang bukan data resmi.
+3. Kriteria lolos: teks tidak keluar area visual atas (x 4–96%, y 7–47%), tidak ada yang menutupi wajah Reina atau subtitle, label "contoh"/"ilustrasi" ada di angka yang bukan data resmi.
 
 ### Langkah 3 — Kirim paket stage1
 `python run.py stage1 episodes/epXX.py` lalu kirim ke user dalam **satu** kirim (SendUserFile):
@@ -56,7 +56,8 @@ Pesan singkat (bahasa Indonesia): topik, durasi estimasi, placeholder yang perlu
 
 - **Reina**: rambut hitam panjang bergelombang, poni asimetris, headband biru, mata cokelat, garis tipis di pipi kiri, kaos biru oversized, celana pendek hitam list putih. **Kostum tidak pernah berubah.** Wajah selalu asli — **jangan tempel sprite mata**; lip sync hanya mulut.
 - Pose tanpa titik mulut (`think`, `back`, `side_left`, `side_right`, `hands_face`) = tidak ada gerak bibir → pakai hanya untuk shot pendek/tanpa banyak dialog.
-- **Tema clean**: latar kantor blur (`assets/bg/office.png`), panel krem di atas, kartu/chip flat vector, font Poppins. **Tanpa lingkaran/dekor di belakang Reina.** Tanpa efek pixel.
+- **Tema putih polos** (sejak Ep12): latar rata #F7F5F0 dibuat engine — tanpa foto kantor, tanpa panel/kotak latar, tanpa garis pemisah. Visual flat vector di area atas, font Poppins. **Tanpa lingkaran/dekor di belakang Reina.** Tanpa efek pixel.
+- **Posisi Reina berganti** (jangan di tengah terus): tiap shot punya posisi `kiri` / `kanan` / `closeup` / `tengah` lewat dict `POS` (kalau tidak diisi, engine menggilir otomatis; pose `desk` & end card = `tengah`). Kiri/kanan → subtitle jadi balon ucapan di sisi kosong. Antar shot Reina bergeser halus 0.35 s. **Gambar Reina tidak pernah dicerminkan** (garis pipi kiri harus tetap di kiri).
 - 9:16, 1080×1920, 30 fps. Target durasi final **75–95 detik**.
 - **Selalu ada SFX** (otomatis dari `spec()['sfx']`). Tanpa BGM kecuali diminta.
 - Semua teks layar & dialog ditulis persis. Jangan mengarang harga, statistik, fitur, nama model, testimoni. Angka contoh wajib diberi label "contoh"/"ilustrasi".
@@ -91,7 +92,8 @@ Pesan singkat (bahasa Indonesia): topik, durasi estimasi, placeholder yang perlu
 
 - 1 shot ≈ 1 baris (boleh 2 baris pendek per shot). `SHOTS`: `(id, scene, judul, [nomor baris], jeda_awal, jeda_akhir)`; jeda biasa 0.1–0.25 s, akhir scene 0.4 s, end card `[]` dengan jeda_akhir 2.5.
 - Ganti pose tiap 1–3 shot supaya hidup. Pose: lihat tabel di bawah.
-- Visual tiap shot di `panel(t, sid, im)`: gambar di area **y 7–47%** (panel krem). Subtitle otomatis di y≈52%, Reina di bawah.
+- Visual tiap shot di `panel(t, sid, im)`: gambar di area **y 7–47%**. Subtitle otomatis: tengah y≈52% (posisi tengah/closeup) atau balon samping y≈60% (kiri/kanan), Reina di bawah.
+- `POS = {'SH01': 'kiri', 'SH02': 'kanan', ...}`: atur supaya posisi berganti tiap 1–2 shot; `closeup` untuk kalimat penekanan/punchline, `tengah` maksimal ±20% shot (end card & pose `desk` selalu tengah).
 - Sinkron ke kata: pakai `rel('Lxx', f)` (waktu absolut pada fraksi f baris Lxx). Pola standar:
   ```python
   G(L('L05', 0.45), fungsi_gambar, anchor)   # pop-in elemen saat ±45% baris L05
@@ -135,7 +137,7 @@ episodes/ep06.py       contoh episode lengkap (template)
 assets/poses/          pose Reina (PNG transparan) + poses.json (lebar, titik mulut)
 assets/mouth_patches/  potongan area mulut yang sudah di-inpaint (untuk lip sync)
 assets/sprites/        sprite mulut (+ mata/efek, tidak dipakai di wajah)
-assets/bg/office.png   latar kantor
+assets/bg/office.png   latar kantor (tema lama, tidak dipakai lagi)
 assets/brand/          logo Sakelar toggle (main = utama, transparan; app_light/app_mint/app_dark = versi kotak)
 assets/fonts/          Poppins (SIL OFL)
 ```
