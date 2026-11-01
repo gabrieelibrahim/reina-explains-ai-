@@ -8,13 +8,13 @@ def storyboard_md(E, final=False):
     m = E.m; SHOTS, LINES, TOT = E.shots, E.lines, E.total
     spec = m.spec; last = SHOTS[-1]['id']; smile = getattr(m, 'SMILE', set()); meta = getattr(m, 'META', {})
     out = []; P = out.append
-    P(f'# Reina Explains AI — Episode {E.ep:02d}: "{m.TITLE}"\n')
+    P(f'# {E.series} — Episode {E.ep:02d}: "{m.TITLE}"\n')
     P('Storyboard produksi · tema **clean** (flat vector di atas latar kantor blur) · 9:16 · 1080×1920 · 30 fps\n')
     P(f'> Setiap frame adalah fungsi dari waktu: `frame(t)` → gambar. Semua posisi/animasi dihitung dari `t` saja (tanpa state antar-frame). Implementasi: `episodes/{E.tag}.py` + `engine/reina.py`.\n')
     P('## 1. Metadata proyek\n')
     P('| Item | Nilai |\n|---|---|')
     dur_note = 'final, mengikuti VO (jeda dipotong, tempo 1.10×)' if final else 'estimasi sebelum VO (6.4 suku kata/s)'
-    for k, v in [('Judul', f'Reina Explains AI — Ep {E.ep:02d}: {m.TITLE}'), ('Tujuan', meta.get('tujuan', '—')),
+    for k, v in [('Judul', f'{E.series} — Ep {E.ep:02d}: {m.TITLE}'), ('Tujuan', meta.get('tujuan', '—')),
                  ('Audiens', 'Pengguna AI awam Indonesia (TikTok/Reels/Shorts)'), ('Durasi', f'{TOT:.3f} s ({tc(TOT)}) = {fr(TOT)} frame — {dur_note}'),
                  ('Rasio/resolusi', '9:16, 1080×1920'), ('FPS', '30'), ('Gaya', 'Clean: kartu/chip/ikon flat vector di panel krem, latar kantor isometrik blur; karakter tanpa efek pixel'),
                  ('Karakter', 'Reina — pose ilustrasi asli (paket Reina Asset Baju Biru)'), ('Bahasa/tone', 'Indonesia santai, edukatif, lucu ringan'),
@@ -57,7 +57,7 @@ def storyboard_md(E, final=False):
     for x in ['Koordinat = persen kanvas, origin (0,0) kiri atas. Ukuran font & radius dalam px pada 1080×1920.',
               'Latar: tema putih polos, warna rata #F7F5F0 1080×1920. Statis. Tanpa foto, tanpa garis, tanpa lingkaran/dekor.',
               'Posisi Reina berganti per shot (kiri / kanan / closeup / tengah), geser halus 0.35 s antar shot; gambar Reina tidak pernah dicerminkan.',
-              f'Header (z=5): badge navy "REINA EXPLAINS AI · EP {E.ep:02d}" Poppins Medium 24px putih di (50%,3.6%).',
+              f'Header (z=5): badge navy "{E.series.upper()} · EP {E.ep:02d}" Poppins Medium 24px putih di (50%,3.6%).',
               'Panel visual (z=3): area y 7–47%. Kartu putih radius 28–44px, shadow navy 13% offset +0.45% y.',
               'Pop-in standar: opacity 0→1 dalam 0.16 s, scale 0.90→1.00 easeOutBack 0.35 s.',
               'Reina (z=4): anchor bawah-tengah di y=100%. Lebar sesuai assets/poses/poses.json (pose baru 86%, pose asli 80%, desk 100%). Napas: tinggi ×(1 + 0.006·(0.5+0.5·sin(2πt/3))). Saat pose/scene berubah: masuk dy=+5%→0, 0.35 s easeOutBack.',
@@ -140,7 +140,7 @@ def storyboard_md(E, final=False):
 
 def vo_prompt_md(E):
     m = E.m
-    o = [f'# Prompt VO — Reina Explains AI Episode {E.ep:02d}', '', f'**Judul:** {m.TITLE}', '', '## Karakter suara', '',
+    o = [f'# Prompt VO — {E.series} Episode {E.ep:02d}', '', f'**Judul:** {m.TITLE}', '', '## Karakter suara', '',
          '- Perempuan muda Indonesia, awal 20-an; nada sedang cenderung tinggi, jernih, hangat.',
          '- Santai, cerdas, sedikit jenaka, seperti teman yang jago teknologi; logat Jakarta ringan; tidak seperti iklan.',
          '- Tempo sedang-cepat, sekitar 2,7 kata per detik. Tanpa musik, tanpa efek.', '- Suara sama dengan episode sebelumnya.', '',

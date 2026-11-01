@@ -9,4 +9,9 @@ Sumber kebenaran nomor episode & status. Setiap run: tambah baris baru, lalu com
 | 05 | Context window — kenapa AI bisa "lupa" | — | selesai (tema pixel) |
 | 06 | Token itu apa sih? | — | selesai (tema clean, tanpa SFX) |
 | 07 | Kok Jawaban AI Beda-beda? (temperature / unsur acak) | 2026-10-22 | selesai (88 s, tema clean + SFX) |
-| 13 | Sekarang Bisa Chat AI Langsung di Web Sakelar! (tutorial fitur Chat) | 2026-11-01 | menunggu suara |
+
+## Reina Tutorial (seri terpisah, tutorial fitur Sakelar)
+
+| Ep | Judul / topik | Tanggal | Status |
+|---|---|---|---|
+| 03 | Sekarang Bisa Chat AI Langsung di Web Sakelar! (fitur Chat) | 2026-11-01 | selesai (66 s) |

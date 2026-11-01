@@ -229,7 +229,7 @@ def r(sid, lid, f=0.0):
 class Episode:
     def __init__(self, mod, workdir):
         self.m = mod; self.workdir = workdir
-        self.ep = mod.EP; self.tag = f'ep{mod.EP:02d}'
+        self.ep = mod.EP; self.tag = getattr(mod, 'TAG', f'ep{mod.EP:02d}'); self.series = getattr(mod, 'SERIES', 'Reina Explains AI')
         self.audio_dir = os.path.join(workdir, 'audio', self.tag)
         dp = os.path.join(self.audio_dir, 'durs.json')
         self.durs = json.load(open(dp)) if os.path.exists(dp) else None
@@ -292,7 +292,7 @@ class Episode:
         m = self.m; s = self.shot_at(t); sid = s['id']; u = t - s['start']
         i = self.shots.index(s); prev = self.shots[i - 1] if i else None
         enter = prev is None or prev['scene'] != s['scene'] or m.POSE[prev['id']] != m.POSE[sid]
-        bg = background(t, f'REINA EXPLAINS AI  ·  EP {self.ep:02d}')
+        bg = background(t, f'{self.series.upper()}  ·  EP {self.ep:02d}')
         pn = canvas(); m.panel(t, sid, pn); bg.alpha_composite(pn)
         base = bg.resize((W, H), Image.LANCZOS)
         name = m.POSE[sid]; smile = sid in getattr(m, 'SMILE', set())

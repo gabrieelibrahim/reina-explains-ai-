@@ -1,11 +1,13 @@
-"""Reina Explains AI — Episode 13: "Sekarang Bisa Chat AI Langsung di Web Sakelar!" (tutorial fitur Chat, tema putih polos).
+"""Reina Tutorial — Episode 03: "Sekarang Bisa Chat AI Langsung di Web Sakelar!" (tutorial fitur Chat, tema putih polos).
 Satu file = satu episode: naskah, shot, pose, posisi, visual panel(t), spec storyboard + SFX, arahan VO.
-Jalankan:  python run.py stage1 episodes/ep13.py   lalu   python run.py stage2 episodes/ep13.py <zip_suara>"""
+Jalankan:  python run.py stage1 episodes/tutorial03.py   lalu   python run.py stage2 episodes/tutorial03.py <zip_suara>"""
 import math
 from PIL import Image, ImageDraw
 from reina import *
 
-EP = 13
+SERIES = 'Reina Tutorial'
+EP = 3
+TAG = 'tutorial03'
 TITLE = 'Sekarang Bisa Chat AI Langsung di Web Sakelar!'
 SCENES = {1: 'Hook', 2: 'Dulu vs sekarang', 3: 'Tutorial 4 langkah', 4: 'Satu dashboard', 5: 'Tips pilih model',
           6: 'Pantau pemakaian', 7: 'Closing', 8: 'End card'}
@@ -443,7 +445,7 @@ def panel(t, sid, im):
         wordmark(lay, 50, 15, 240, tsize=50)
         txt(lay, 'Sekarang bisa langsung Chat', (50, 26.5), 38, F['ink'], 'SemiBold')
         rr(lay, (22, 30, 78, 35.5), 40, SK['green']); txt(lay, 'sakelar.web.id', (50, 32.75), 44, F['white'], 'Bold')
-        txt(lay, 'Ep 13 · Chat AI Langsung di Web Sakelar', (50, 39), 28, F['ink2'], 'Medium')
+        txt(lay, 'Reina Tutorial Ep 03 · Chat AI di Web Sakelar', (50, 39), 28, F['ink2'], 'Medium')
         comp(im, lay, a, sc, (50, 25))
 
 
@@ -591,7 +593,7 @@ def spec(sid):
     if sid == 'SH19': return dict(
         goal='End card: ajakan mencoba fitur Chat di Sakelar AI.',
         obj=['Kartu putih x=10–90%, y=9–42%.', 'wordmark() 240px (50%,15%).', '"Sekarang bisa langsung Chat" (50%,26.5%).',
-             'Tombol hijau #1F6B52 x=22–78%, y=30–35.5% "sakelar.web.id".', '"Ep 13 · Chat AI Langsung di Web Sakelar" (50%,39%).'],
+             'Tombol hijau #1F6B52 x=22–78%, y=30–35.5% "sakelar.web.id".', '"Reina Tutorial Ep 03 · Chat AI di Web Sakelar" (50%,39%).'],
         anim=[(0.05, 'Kartu pop-in.'), (round(d - 0.5, 3), 'Fade ke warna latar 0.5 s.')],
         text=['"Sekarang bisa langsung Chat" SemiBold 38px.', '"sakelar.web.id" Bold 44px putih.', 'Judul episode Medium 28px abu.'],
         sfx=[(0.05, 'stinger', 1.2, -12, 'end card'), (0.1, 'jingle', 0.6, -16, 'logo')],

@@ -55,7 +55,7 @@ def sheets(E, d):
         Wd = max(1180, PAD + len(shots) * (PW + PAD)); im = Image.new('RGB', (Wd, 1168), '#F6F1E7'); dr = ImageDraw.Draw(im)
         dr.text((PAD, 34), f'SCENE {sc} — {E.m.SCENES[sc]}', font=P(50), fill='#1E2A4A')
         a, b = shots[0]['start'], shots[-1]['end']
-        dr.text((PAD, 104), f'{RE.tc(a)[3:]} – {RE.tc(b)[3:]}  ·  {b - a:.1f} s  ·  Reina Explains AI Ep.{E.ep:02d}', font=P(26, 'Medium'), fill='#5A6684')
+        dr.text((PAD, 104), f'{RE.tc(a)[3:]} – {RE.tc(b)[3:]}  ·  {b - a:.1f} s  ·  {E.series} Ep.{E.ep:02d}', font=P(26, 'Medium'), fill='#5A6684')
         for i, s in enumerate(shots):
             x = PAD + i * (PW + PAD); y = 150
             k = Image.open(os.path.join(kd, f"{s['id']}.png")).resize((PW, PH), Image.LANCZOS)
