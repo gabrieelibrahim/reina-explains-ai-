@@ -87,6 +87,13 @@ POSE = {'SH01': 'phone', 'SH02': 'point_up', 'SH03': 'point', 'SH04': 'arms34', 
 POS = {'SH01': 'kiri', 'SH02': 'closeup', 'SH03': 'kanan', 'SH04': 'kiri', 'SH05': 'kanan', 'SH06': 'kiri',
        'SH07': 'tengah', 'SH08': 'tengah', 'SH09': 'kanan', 'SH10': 'kiri', 'SH11': 'closeup', 'SH12': 'kanan',
        'SH13': 'kiri', 'SH14': 'kanan', 'SH15': 'kiri', 'SH16': 'closeup', 'SH17': 'tengah'}
+# thumbnail pembuka (0.5 s pertama video + epXX_thumbnail.png): judul ≤3 baris pendek (±12 huruf/baris), 1 kata hook disorot
+THUMB = dict(judul=['API KEY', 'KAMU BOCOR?'], hl='BOCOR?', sub='tagihan AI bisa bengkak', pose='point', pos='kanan', mouth='open', dur=0.5)
+def thumb_art(l):
+    """Visual pendukung thumbnail (area y 30–47%, sisi kiri kosong karena Reina di kanan)."""
+    key_icon(l, 28, 39, 1.25)
+    for i in range(3): ell(l, 42 + i * 3.5, 43 + i * 2.0, 14, 21, F['blue'], a=255 - i * 60)
+    badge(l, 'Rp ???', 22, 48.5, F['red'], F['white'], 40)
 SMILE = {'SH16'}
 EXPR = {'SH01': 'heran sambil lihat HP', 'SH02': 'serius, menekankan', 'SH03': 'menjelaskan, menunjuk penonton',
         'SH04': 'analitis', 'SH05': 'serius', 'SH06': 'menjelaskan', 'SH07': 'fokus ke monitor', 'SH08': 'percaya diri',

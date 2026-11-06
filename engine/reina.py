@@ -233,6 +233,8 @@ class Episode:
         self.audio_dir = os.path.join(workdir, 'audio', self.tag)
         dp = os.path.join(self.audio_dir, 'durs.json')
         self.durs = json.load(open(dp)) if os.path.exists(dp) else None
+        self.thumb = thumb_spec(mod, self.series); self.thumb_dur = self.thumb['dur'] if self.thumb else 0.0
+        self._thumb_img = None
         self.build_timeline()
         self.vo = None
         ap = os.path.join(self.audio_dir, 'env.json')
@@ -243,7 +245,7 @@ class Episode:
             lv = np.array([int(np.round(np.median(lv[max(0, i - 3): i + 4]))) for i in range(len(lv))])
             self.vo = dict(hop=al['hop'], lv=lv)
     def build_timeline(self):
-        m = self.m; t = 0.0; shots = []; lines = []; gap = getattr(m, 'GAP', 0.25)
+        m = self.m; t = snap(self.thumb_dur); shots = []; lines = []; gap = getattr(m, 'GAP', 0.25)
         for sid, sc, title, ls, lead, tail in m.SHOTS:
             s0 = t; t = snap(t + lead)
             for k, li in enumerate(ls):
@@ -289,6 +291,7 @@ class Episode:
     # --- frame ---
     def frame(self, t):
         """Frame pada waktu t (detik). Fungsi murni dari t."""
+        if t < self.thumb_dur: return self.thumb_frame()
         m = self.m; s = self.shot_at(t); sid = s['id']; u = t - s['start']
         i = self.shots.index(s); prev = self.shots[i - 1] if i else None
         enter = prev is None or prev['scene'] != s['scene'] or m.POSE[prev['id']] != m.POSE[sid]
@@ -317,6 +320,60 @@ class Episode:
             k = clamp((t - (self.total - 0.5)) / 0.5)
             base = Image.blend(base, Image.new('RGBA', (W, H), rgba(F['bg'])), k)
         return base.convert('RGB')
+
+    # --- thumbnail (frame pembuka 0–thumb_dur s; juga disimpan sebagai epXX_thumbnail.png) ---
+    def thumb_frame(self):
+        if self._thumb_img is None: self._thumb_img = render_thumb(self)
+        return self._thumb_img.copy()
+
+def thumb_spec(m, series):
+    """THUMB di file episode: dict(judul=[baris...], hl='kata', sub='...', pose=..., pos=..., mouth=None|'open'|'smile', dur=0.5).
+    Kalau tidak ada THUMB: seri Reina Explains AI tetap dapat thumbnail otomatis dari TITLE; seri lain tanpa thumbnail."""
+    th = getattr(m, 'THUMB', None)
+    if th is None and series != 'Reina Explains AI': return None
+    th = dict(th or {})
+    if not th.get('judul'): th['judul'] = wrap(m.TITLE.upper(), 12)[:3]
+    if isinstance(th['judul'], str): th['judul'] = th['judul'].split('\n')
+    th.setdefault('hl', th['judul'][-1].split()[-1])
+    th.setdefault('sub', ''); th.setdefault('pose', m.POSE[m.SHOTS[0][0]]); th.setdefault('pos', 'kanan')
+    th.setdefault('mouth', None); th.setdefault('dur', 0.5); th.setdefault('zoom', 1.3)
+    return th
+
+def render_thumb(E):
+    """Thumbnail tema putih polos: judul besar (kata hl disorot coral), sub-judul, gambar thumb_art() episode, Reina tanpa subtitle."""
+    th = E.thumb; m = E.m
+    b = background(0, f'{E.series.upper()}  ·  EP {E.ep:02d}')
+    lay = canvas()
+    if hasattr(m, 'thumb_art'): m.thumb_art(lay)          # ikon/visual pendukung (area y 30–47%)
+    lines = th['judul']; hlw = set(th['hl'].upper().split())
+    size = 150
+    while size > 70 and max(tw_px(l, size, 'Bold') + 60 * sum(w in hlw for w in l.upper().split()) for l in lines) > W * 0.90: size -= 4
+    lh = size * 1.18 / H * 100; y0 = 9.5 + lh / 2
+    for i, ln in enumerate(lines):
+        words = ln.split(); sp = tw_px(' ', size, 'Bold')
+        ws = [tw_px(w_, size, 'Bold') + (60 if w_.upper() in hlw else 0) for w_ in words]
+        x = (W - (sum(ws) + sp * (len(words) - 1))) / 2; y = y0 + i * lh
+        for w_, wpx in zip(words, ws):
+            xc = (x + wpx / 2) / W * 100
+            if w_.upper() in hlw:
+                rr(lay, ((x) / W * 100, y - lh * 0.46, (x + wpx) / W * 100, y + lh * 0.40), 30, F['coral'])
+                txt(lay, w_, (xc, y - lh * 0.03), size, F['white'], 'Bold')
+            else:
+                txt(lay, w_, (xc, y - lh * 0.03), size, F['ink'], 'Bold')
+            x += wpx + sp
+    if th['sub']:
+        ys = y0 + len(lines) * lh - lh * 0.15
+        badge(lay, th['sub'], 50, ys + 1.2, F['ink'], F['white'], 40)
+    b.alpha_composite(lay)
+    base = b.resize((W, H), Image.LANCZOS)
+    name = th['pose']; mo = {'open': 'mouth_open_A', 'smile': 'mouth_smile_closed'}.get(th['mouth'])
+    img = pose_image(name, mo if has_lipsync(name) else None)
+    sc, cx, dyp = LAYOUTS[th['pos']]; sc *= th['zoom']; dyp += (th['zoom'] - 1) * 30   # Reina lebih besar, kaki terpotong bawah
+    cx = {'kiri': 34, 'kanan': 66}.get(th['pos'], cx)
+    w = int(W * POSES['poses'][name]['width_pct'] / 100 * sc)
+    rimg = img.resize((w, int(w * img.height / img.width)), Image.LANCZOS)
+    base.alpha_composite(rimg, (int(W * cx / 100 - w / 2), int(H - rimg.height + dyp * H / 100)))
+    return base.convert('RGB')
 
 def wrap(s, n=32):
     words, lines, cur = s.split(), [], ''

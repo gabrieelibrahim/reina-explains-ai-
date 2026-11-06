@@ -32,7 +32,7 @@ dalam satu kali kirim. User boleh langsung rekam; revisi visual tetap bisa kapan
 3. Tulis naskah mengikuti **Panduan naskah** di bawah.
 
 ### Langkah 2 — Bikin file episode
-1. `cp episodes/<episode terbaru>.py episodes/epXX.py`, lalu ganti: `EP`, `TITLE`, `SCENES`, `META`, `PRON`, `VO_DIR`, `LINES`, `SHOTS`, `POSE`, `POS`, `SMILE`, `EXPR`, `panel()`, `spec()`.
+1. `cp episodes/<episode terbaru>.py episodes/epXX.py`, lalu ganti: `EP`, `TITLE`, `SCENES`, `META`, `PRON`, `VO_DIR`, `LINES`, `SHOTS`, `POSE`, `POS`, `THUMB`, `thumb_art()`, `SMILE`, `EXPR`, `panel()`, `spec()`.
 2. `python run.py check episodes/epXX.py` → **lihat SETIAP gambar `out/epXX/epXX_sceneN_*.png`** (pakai Read). Perbaiki teks terpotong, tumpang tindih, elemen keluar panel, lalu ulangi `check`.
 3. Kriteria lolos: teks tidak keluar area visual atas (x 4–96%, y 7–47%), tidak ada yang menutupi wajah Reina atau subtitle, label "contoh"/"ilustrasi" ada di angka yang bukan data resmi.
 
@@ -57,6 +57,12 @@ Pesan singkat (bahasa Indonesia): topik, durasi estimasi, placeholder yang perlu
 - **Reina**: rambut hitam panjang bergelombang, poni asimetris, headband biru, mata cokelat, garis tipis di pipi kiri, kaos biru oversized, celana pendek hitam list putih. **Kostum tidak pernah berubah.** Wajah selalu asli — **jangan tempel sprite mata**; lip sync hanya mulut.
 - Pose tanpa titik mulut (`think`, `back`, `side_left`, `side_right`, `hands_face`) = tidak ada gerak bibir → pakai hanya untuk shot pendek/tanpa banyak dialog.
 - **Tema putih polos** (sejak Ep12): latar rata #F7F5F0 dibuat engine — tanpa foto kantor, tanpa panel/kotak latar, tanpa garis pemisah. Visual flat vector di area atas, font Poppins. **Tanpa lingkaran/dekor di belakang Reina.** Tanpa efek pixel.
+- **Thumbnail pembuka** (sejak Ep12, seri Reina Explains AI): 0.5 s pertama video = frame thumbnail diam (jadi cover + hook), juga disimpan sebagai `epXX_thumbnail.png`.
+  Isi di file episode `THUMB = dict(judul=[...], hl='...', sub='...', pose='...', pos='kanan'|'kiri'|'tengah', mouth=None|'open'|'smile', dur=0.5)` + fungsi opsional `thumb_art(l)`
+  (ikon pendukung di sisi kosong, y≈30–50%). Aturan judul: 1–3 baris pendek (±12 huruf/baris), huruf kapital, berupa pertanyaan/pernyataan yang bikin penasaran
+  dan nyambung ke hook L01 — bukan sekadar mengulang judul episode; `hl` = 1 kata paling memancing (disorot coral); `sub` ≤ 28 karakter.
+  Tidak boleh klaim/angka karangan (pakai "Rp ???" atau label contoh). Pose ekspresif yang lip sync (point, point_up, hands_on_hips, phone, thumbs_up, bust, shy_lean).
+  Contoh lengkap: `episodes/ep12.py`.
 - **Posisi Reina berganti** (jangan di tengah terus): tiap shot punya posisi `kiri` / `kanan` / `closeup` / `tengah` lewat dict `POS` (kalau tidak diisi, engine menggilir otomatis; pose `desk` & end card = `tengah`). Kiri/kanan → subtitle jadi balon ucapan di sisi kosong. Antar shot Reina bergeser halus 0.35 s. **Gambar Reina tidak pernah dicerminkan** (garis pipi kiri harus tetap di kiri).
 - 9:16, 1080×1920, 30 fps. Target durasi final **75–95 detik**.
 - **Selalu ada SFX** (otomatis dari `spec()['sfx']`). Tanpa BGM kecuali diminta.

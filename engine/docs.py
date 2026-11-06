@@ -52,6 +52,14 @@ def storyboard_md(E, final=False):
         sp = spec(s['id'])
         P(f"| {s['id']} | {tc(s['start'])} | {tc(s['end'])} | {s['end'] - s['start']:.3f} s | {fr(s['start'])}–{fr(s['end']) - 1} | {s['title']} | {', '.join(s['lines']) or '—'} | {sp['goal']} | {m.POSE[s['id']]} | {layout_of(m, SHOTS, SHOTS.index(s))} | {'fade ke latar 0.5 s' if s['id'] == last else 'hard cut'} |")
     P('')
+    if E.thumb:
+        th = E.thumb
+        P(f"### Thumbnail pembuka (00:00.000 – {tc(E.thumb_dur)[3:]}, {E.thumb_dur:.2f} s) — juga `{E.tag}_thumbnail.png`\n")
+        P('- Frame diam di awal video (jadi cover + hook), tema putih polos, tanpa subtitle. Cut + SFX whoosh (−18 dB) ke SH01.')
+        P('- Judul: ' + ' / '.join(f'"{l}"' for l in th['judul']) + f" — Bold besar (maks 150px), kata \"{th['hl']}\" disorot kotak coral teks putih.")
+        if th['sub']: P(f"- Sub-judul: badge navy \"{th['sub']}\" di bawah judul.")
+        P(f"- Visual pendukung: {'thumb_art() dari file episode (area y≈30–47%)' if hasattr(m, 'thumb_art') else 'tidak ada'}.")
+        P(f"- Reina pose `{th['pose']}`, posisi **{th['pos']}**, mulut {th['mouth'] or 'asli (tertutup)'}.\n")
     P('## 6. Storyboard per shot\n')
     P('**Konvensi global (berlaku di semua shot, kecuali disebut lain):**')
     for x in ['Koordinat = persen kanvas, origin (0,0) kiri atas. Ukuran font & radius dalam px pada 1080×1920.',

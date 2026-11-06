@@ -38,6 +38,12 @@ def validate(E):
             if c[1] not in SFX.LIB: errs.append(f"{sid}: SFX '{c[1]}' tidak dikenal (pilihan: {', '.join(SFX.LIB)})")
     used = sorted({li for _, _, _, ls, _, _ in m.SHOTS for li in ls})
     if used != list(range(1, len(m.LINES) + 1)): errs.append(f'baris dipakai {used} ≠ 1..{len(m.LINES)} (tiap baris harus dipakai tepat sekali, berurutan)')
+    if E.thumb:
+        th = E.thumb
+        if th['pose'] not in RE.POSES['poses']: errs.append(f"THUMB: pose '{th['pose']}' tidak ada")
+        if th['pos'] not in RE.LAYOUTS: errs.append(f"THUMB: pos '{th['pos']}' tidak dikenal")
+        if len(th['judul']) > 3: errs.append('THUMB: judul maksimal 3 baris')
+        if not 0.2 <= th['dur'] <= 1.5: errs.append('THUMB: dur harus 0.2–1.5 s')
     for l in E.lines:
         if len(l['text']) > 140: errs.append(f"{l['id']}: baris terlalu panjang ({len(l['text'])} karakter) — pecah jadi 2 baris")
     return errs
@@ -46,6 +52,7 @@ def validate(E):
 def keyframes(E, d):
     kd = os.path.join(d, 'keyframes'); os.makedirs(kd, exist_ok=True)
     for s in E.shots: E.frame(E.keys[s['id']]).save(os.path.join(kd, f"{s['id']}.png"))
+    if E.thumb: E.thumb_frame().save(os.path.join(d, f'{E.tag}_thumbnail.png'))
     return kd
 def sheets(E, d):
     kd = os.path.join(d, 'keyframes'); PW, PH, PAD = 432, 768, 40; files = []
@@ -79,6 +86,8 @@ def pack(E, d, name, files, ep_file):
     with zipfile.ZipFile(z, 'w', zipfile.ZIP_DEFLATED) as zf:
         for f in files: zf.write(f, os.path.relpath(f, d))
         for f in sorted(glob.glob(os.path.join(d, 'keyframes', '*.png'))): zf.write(f, os.path.relpath(f, d))
+        tp = os.path.join(d, f'{E.tag}_thumbnail.png')
+        if E.thumb and os.path.exists(tp): zf.write(tp, os.path.basename(tp))
         zf.write(ep_file, f'episode/{os.path.basename(ep_file)}')
     return z
 
@@ -162,6 +171,7 @@ def build_audio(E):
     cues = []
     for s in E.shots:
         for tt, key, dur, db, _ in E.m.spec(s['id'])['sfx']: cues.append((s['start'] + max(0, tt), key, dur, db))
+    if E.thumb: cues.append((max(0, E.thumb_dur - 0.12), 'whoosh', 0.4, -18))   # transisi thumbnail → SH01
     fx = SFX.render(cues, E.total)[:len(y)]
     mix = y + fx; pk = np.abs(mix).max(); mix = mix / pk * 0.95 if pk > 0.95 else mix
     mix = mix[:int(E.total * SR)]
@@ -194,7 +204,8 @@ def stage1(ep_file):
     print(f'{E.tag}: {len(E.shots)} shot, {len(E.lines)} baris, estimasi {E.total:.1f} s')
     keyframes(E, d); sh = sheets(E, d); sb, vp = write_docs(E, d, final=False)
     z = pack(E, d, f'{E.tag}_stage1_storyboard.zip', [sb, vp] + sh, ep_file)
-    print('OUTPUT:', sb, vp, *sh, z, sep='\n  ')
+    th = [os.path.join(d, f'{E.tag}_thumbnail.png')] if E.thumb else []
+    print('OUTPUT:', sb, vp, *th, *sh, z, sep='\n  ')
 
 def stage2(ep_file, voice, preview=None, speed=1.10, cap=0.20):
     E = load(ep_file); os.makedirs(E.audio_dir, exist_ok=True)
