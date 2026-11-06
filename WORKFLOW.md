@@ -59,7 +59,8 @@ Pesan singkat (bahasa Indonesia): topik, durasi estimasi, placeholder yang perlu
 - **Tema putih polos** (sejak Ep12): latar rata #F7F5F0 dibuat engine — tanpa foto kantor, tanpa panel/kotak latar, tanpa garis pemisah. Visual flat vector di area atas, font Poppins. **Tanpa lingkaran/dekor di belakang Reina.** Tanpa efek pixel.
 - **Thumbnail pembuka** (sejak Ep12, seri Reina Explains AI): 0.5 s pertama video = frame thumbnail diam (jadi cover + hook), juga disimpan sebagai `epXX_thumbnail.png`.
   Isi di file episode `THUMB = dict(judul=[...], hl='...', sub='...', pose='...', pos='kanan'|'kiri'|'tengah', mouth=None|'open'|'smile', dur=0.5)` + fungsi opsional `thumb_art(l)`
-  (ikon pendukung di sisi kosong, y≈30–50%). Aturan judul: 1–3 baris pendek (±12 huruf/baris), huruf kapital, berupa pertanyaan/pernyataan yang bikin penasaran
+  (ikon pendukung di sisi kosong, di bawah judul). **Area aman cover 900×1200 px di tengah frame (x 90–990, y 360–1560)**: judul, sub, ikon thumb_art & wajah Reina
+  WAJIB di dalamnya (engine sudah menaruh judul/sub/Reina di sana; koordinat thumb_art harus di x 10–90%, y ≈ judul_bawah–78%). Cek `epXX_thumbnail_area_aman.png` (garis merah putus-putus). Aturan judul: 1–3 baris pendek (±12 huruf/baris), huruf kapital, berupa pertanyaan/pernyataan yang bikin penasaran
   dan nyambung ke hook L01 — bukan sekadar mengulang judul episode; `hl` = 1 kata paling memancing (disorot coral); `sub` ≤ 28 karakter.
   Tidak boleh klaim/angka karangan (pakai "Rp ???" atau label contoh). Pose ekspresif yang lip sync (point, point_up, hands_on_hips, phone, thumbs_up, bust, shy_lean).
   Contoh lengkap: `episodes/ep12.py`.

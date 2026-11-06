@@ -52,7 +52,9 @@ def validate(E):
 def keyframes(E, d):
     kd = os.path.join(d, 'keyframes'); os.makedirs(kd, exist_ok=True)
     for s in E.shots: E.frame(E.keys[s['id']]).save(os.path.join(kd, f"{s['id']}.png"))
-    if E.thumb: E.thumb_frame().save(os.path.join(d, f'{E.tag}_thumbnail.png'))
+    if E.thumb:
+        ti = E.thumb_frame(); ti.save(os.path.join(d, f'{E.tag}_thumbnail.png'))
+        RE.thumb_guide(ti).save(os.path.join(d, f'{E.tag}_thumbnail_area_aman.png'))
     return kd
 def sheets(E, d):
     kd = os.path.join(d, 'keyframes'); PW, PH, PAD = 432, 768, 40; files = []

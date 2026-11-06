@@ -339,41 +339,56 @@ def thumb_spec(m, series):
     th.setdefault('mouth', None); th.setdefault('dur', 0.5); th.setdefault('zoom', 1.3)
     return th
 
+THUMB_SAFE = (90, 360, 990, 1560)   # area aman cover 900×1200 px (tengah frame 1080×1920): semua elemen penting wajib di dalam
 def render_thumb(E):
-    """Thumbnail tema putih polos: judul besar (kata hl disorot coral), sub-judul, gambar thumb_art() episode, Reina tanpa subtitle."""
+    """Thumbnail tema putih polos. Judul + sub + ikon thumb_art() + wajah Reina semuanya di dalam THUMB_SAFE (x 8.3–91.7%, y 18.75–81.25%)."""
     th = E.thumb; m = E.m
+    sx0, sy0, sx1, sy1 = (THUMB_SAFE[0] / W * 100, THUMB_SAFE[1] / H * 100, THUMB_SAFE[2] / W * 100, THUMB_SAFE[3] / H * 100)
     b = background(0, f'{E.series.upper()}  ·  EP {E.ep:02d}')
     lay = canvas()
-    if hasattr(m, 'thumb_art'): m.thumb_art(lay)          # ikon/visual pendukung (area y 30–47%)
     lines = th['judul']; hlw = set(th['hl'].upper().split())
-    size = 150
-    while size > 70 and max(tw_px(l, size, 'Bold') + 60 * sum(w in hlw for w in l.upper().split()) for l in lines) > W * 0.90: size -= 4
-    lh = size * 1.18 / H * 100; y0 = 9.5 + lh / 2
+    maxw = (THUMB_SAFE[2] - THUMB_SAFE[0]) * 0.96; size = 140
+    while size > 64 and max(tw_px(l, size, 'Bold') + 50 * sum(w in hlw for w in l.upper().split()) for l in lines) > maxw: size -= 4
+    lh = size * 1.16 / H * 100; y0 = sy0 + 1.2 + lh / 2
     for i, ln in enumerate(lines):
         words = ln.split(); sp = tw_px(' ', size, 'Bold')
-        ws = [tw_px(w_, size, 'Bold') + (60 if w_.upper() in hlw else 0) for w_ in words]
+        ws = [tw_px(w_, size, 'Bold') + (50 if w_.upper() in hlw else 0) for w_ in words]
         x = (W - (sum(ws) + sp * (len(words) - 1))) / 2; y = y0 + i * lh
         for w_, wpx in zip(words, ws):
             xc = (x + wpx / 2) / W * 100
             if w_.upper() in hlw:
-                rr(lay, ((x) / W * 100, y - lh * 0.46, (x + wpx) / W * 100, y + lh * 0.40), 30, F['coral'])
+                rr(lay, (x / W * 100, y - lh * 0.46, (x + wpx) / W * 100, y + lh * 0.40), 28, F['coral'])
                 txt(lay, w_, (xc, y - lh * 0.03), size, F['white'], 'Bold')
             else:
                 txt(lay, w_, (xc, y - lh * 0.03), size, F['ink'], 'Bold')
             x += wpx + sp
+    ytop = y0 + len(lines) * lh - lh * 0.35          # batas bawah judul
     if th['sub']:
-        ys = y0 + len(lines) * lh - lh * 0.15
-        badge(lay, th['sub'], 50, ys + 1.2, F['ink'], F['white'], 40)
+        badge(lay, th['sub'], 50, ytop + 2.0, F['ink'], F['white'], 38); ytop += 4.2
+    E.thumb_box = dict(safe=(sx0, sy0, sx1, sy1), title_bottom=round(ytop, 2))
+    if hasattr(m, 'thumb_art'): m.thumb_art(lay)     # ikon di sisi kosong, di bawah judul, di dalam area aman
     b.alpha_composite(lay)
     base = b.resize((W, H), Image.LANCZOS)
+    # Reina: puncak kepala tepat di bawah judul, wajah di dalam area aman, badan boleh terpotong tepi bawah frame
     name = th['pose']; mo = {'open': 'mouth_open_A', 'smile': 'mouth_smile_closed'}.get(th['mouth'])
     img = pose_image(name, mo if has_lipsync(name) else None)
-    sc, cx, dyp = LAYOUTS[th['pos']]; sc *= th['zoom']; dyp += (th['zoom'] - 1) * 30   # Reina lebih besar, kaki terpotong bawah
-    cx = {'kiri': 34, 'kanan': 66}.get(th['pos'], cx)
-    w = int(W * POSES['poses'][name]['width_pct'] / 100 * sc)
-    rimg = img.resize((w, int(w * img.height / img.width)), Image.LANCZOS)
-    base.alpha_composite(rimg, (int(W * cx / 100 - w / 2), int(H - rimg.height + dyp * H / 100)))
+    top = max(ytop + 1.5, 40.0) / 100 * H
+    hgt = int((H - top) * th['zoom'] / 1.3 * 1.14)
+    w = int(hgt * img.width / img.height)
+    cx = {'kiri': 33, 'kanan': 67, 'tengah': 50}.get(th['pos'], 50) / 100 * W
+    w = min(w, int(W * 1.05)); hgt = int(w * img.height / img.width)
+    rimg = img.resize((w, hgt), Image.LANCZOS)
+    if top + hgt < H + 6: top = H + 6 - hgt          # tidak ada celah di bawah Reina
+    base.alpha_composite(rimg, (int(cx - w / 2), int(top)))
     return base.convert('RGB')
+
+def thumb_guide(im):
+    """Salinan thumbnail + garis putus-putus area aman 900×1200 (untuk QA)."""
+    g = im.copy(); d = ImageDraw.Draw(g); x0, y0, x1, y1 = THUMB_SAFE
+    for x in range(x0, x1, 28): d.line([x, y0, min(x + 14, x1), y0], fill='#E5484D', width=5); d.line([x, y1, min(x + 14, x1), y1], fill='#E5484D', width=5)
+    for y in range(y0, y1, 28): d.line([x0, y, x0, min(y + 14, y1)], fill='#E5484D', width=5); d.line([x1, y, x1, min(y + 14, y1)], fill='#E5484D', width=5)
+    d.text((x0, y0 - 78), 'AREA AMAN 900×1200', font=font(30, 'SemiBold'), fill='#E5484D')
+    return g
 
 def wrap(s, n=32):
     words, lines, cur = s.split(), [], ''
